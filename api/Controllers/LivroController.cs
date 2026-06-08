@@ -36,6 +36,13 @@ public class LivroController : ControllerBase
     {
         _context.Livros.Add(livro);
         await _context.SaveChangesAsync();
+
+        // Recarrega o livro do banco com a Categoria incluída
+        var livroCriado = await _context.Livros
+            .Include(l => l.Categoria)
+            .FirstOrDefaultAsync(l => l.Id == livro.Id);
+
+
         return CreatedAtAction(nameof(GetById), new {id = livro.Id}, livro);
     }
 
@@ -55,7 +62,9 @@ public class LivroController : ControllerBase
     {
         var livro = await _context.Livros.FindAsync(id);
         if (livro == null) return NotFound();
+
         _context.Livros.Remove(livro);
+        await _context.SaveChangesAsync();
         return NoContent();
     }
 }
