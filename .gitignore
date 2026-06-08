@@ -238,6 +238,9 @@ _pkginfo.txt
 !?*.[Cc]ache/
 
 # Others
+*.db
+*.db-shm
+*.db-wal
 ClientBin/
 ~$*
 *~
