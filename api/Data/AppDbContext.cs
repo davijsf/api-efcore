@@ -14,4 +14,17 @@ public class AppDbContext : DbContext
     public DbSet<Emprestimo> Emprestimos { get; set; }
     public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<Perfil> Perfis { get; set; }
+
+    public void PopulateTestData()
+    {
+        Console.WriteLine("Apago dados de teste...");
+        Livros.RemoveRange(Livros.ToList());
+        Console.WriteLine("Adicionar dados de teste...");
+        Livros.AddRange(
+            new Livro { Titulo = "O pequeno príncipe", Autor = "Davi de Dó", AnoPublicacao = 2000, QuantidadeDisponivel = 150},
+            new Livro { Titulo = "As aventuras de Tintin", Autor = "Lusiane de Lá", AnoPublicacao = 1998, QuantidadeDisponivel = 10},
+            new Livro { Titulo = "As crônicas de nárnia", Autor = "Carlos de Si", AnoPublicacao = 2015, QuantidadeDisponivel = 15}
+        );
+        SaveChanges();
+    }
 }
