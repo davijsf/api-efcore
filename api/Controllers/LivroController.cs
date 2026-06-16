@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models;
+using Dtos;
 
 [ApiController]
 [Route("api/[controller]")]
 public class LivroController : ControllerBase
 {
-    
     private readonly AppDbContext _context;
 
     public LivroController(AppDbContext context)
@@ -16,42 +16,58 @@ public class LivroController : ControllerBase
 
     // GET: api/livro
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Livro>>> GetAll()
+    public async Task<ActionResult<IEnumerable<LivroDto>>> GetAll()
     {
-        return await _context.Livros.ToListAsync();
+        var livros = await _context.Livros
+            .Include(l => l.Categoria)
+            .ToListAsync();
+
+        return Ok(livros.Select(l => l.ToDto()));
     }
 
     // GET: api/livro/1
     [HttpGet("{id}")]
-    public async Task<ActionResult<Livro>> GetById(int id)
+    public async Task<ActionResult<LivroDto>> GetById(int id)
     {
-        var livro = await _context.Livros.FindAsync(id);
+        var livro = await _context.Livros
+            .Include(l => l.Categoria)
+            .FirstOrDefaultAsync(l => l.Id == id);
+
         if (livro == null) return NotFound();
-        return livro;
+        return Ok(livro.ToDto());
     }
 
     // POST: api/livro
     [HttpPost]
-    public async Task<ActionResult<Livro>> Create(Livro livro)
+    public async Task<ActionResult<LivroDto>> Create(LivroCreateDto dto)
     {
+        if (!await _context.Categorias.AnyAsync(c => c.Id == dto.CategoriaId))
+            return BadRequest("Categoria inválida.");
+
+        var livro = dto.ToModel();
         _context.Livros.Add(livro);
         await _context.SaveChangesAsync();
 
-        // Recarrega o livro do banco com a Categoria incluída
-        var livroCriado = await _context.Livros
-            .Include(l => l.Categoria)
-            .FirstOrDefaultAsync(l => l.Id == livro.Id);
-
-
-        return CreatedAtAction(nameof(GetById), new {id = livro.Id}, livro);
+        return CreatedAtAction(nameof(GetById), new { id = livro.Id }, livro.ToDto());
     }
 
     // PUT: api/livro/1
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, Livro livro)
+    public async Task<IActionResult> Update(int id, LivroCreateDto dto)
     {
-        if (id != livro.Id) return BadRequest();
-        _context.Entry(livro).State = EntityState.Modified;
+        var livro = await _context.Livros.FindAsync(id);
+        if (livro == null) return NotFound();
+
+        if (!await _context.Categorias.AnyAsync(c => c.Id == dto.CategoriaId))
+            return BadRequest("Categoria inválida.");
+
+        livro.Titulo = dto.Titulo;
+        livro.Autor = dto.Autor;
+        livro.ISBN = dto.ISBN;
+        livro.AnoPublicacao = dto.AnoPublicacao;
+        livro.QuantidadeDisponivel = dto.QuantidadeDisponivel;
+        livro.CategoriaId = dto.CategoriaId;
+
         await _context.SaveChangesAsync();
         return NoContent();
     }
