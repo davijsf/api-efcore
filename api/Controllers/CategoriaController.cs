@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models;
+using Dtos;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -15,35 +16,41 @@ public class CategoriaController : ControllerBase
 
     // GET: api/categoria
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Categoria>>> GetAll()
+    public async Task<ActionResult<IEnumerable<CategoriaDto>>> GetAll()
     {
-        return await _context.Categorias.ToListAsync();
+        var categorias = await _context.Categorias.ToListAsync();
+        return Ok(categorias.Select(c => c.ToDto()));
     }
 
     // GET: api/categoria/1
     [HttpGet("{id}")]
-    public async Task<ActionResult<Categoria>> GetById(int id)
+    public async Task<ActionResult<CategoriaDto>> GetById(int id)
     {
         var categoria = await _context.Categorias.FindAsync(id);
         if (categoria == null) return NotFound();
-        return categoria;
+        return Ok(categoria.ToDto());
     }
 
     // POST: api/categoria
     [HttpPost]
-    public async Task<ActionResult<Categoria>> Create(Categoria categoria)
+    public async Task<ActionResult<CategoriaDto>> Create(CategoriaCreateDto dto)
     {
+        var categoria = dto.ToModel();
         _context.Categorias.Add(categoria);
         await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetById), new { id = categoria.Id }, categoria);
+        return CreatedAtAction(nameof(GetById), new { id = categoria.Id }, categoria.ToDto());
     }
 
     // PUT: api/categoria/1
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, Categoria categoria)
+    public async Task<IActionResult> Update(int id, CategoriaCreateDto dto)
     {
-        if (id != categoria.Id) return BadRequest();
-        _context.Entry(categoria).State = EntityState.Modified;
+        var categoria = await _context.Categorias.FindAsync(id);
+        if (categoria == null) return NotFound();
+
+        categoria.Nome = dto.Nome;
+        categoria.Descricao = dto.Descricao;
+
         await _context.SaveChangesAsync();
         return NoContent();
     }
