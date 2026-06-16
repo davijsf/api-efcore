@@ -6,10 +6,6 @@ var builder = WebApplication.CreateBuilder(args);
 string? stcnn = builder.Configuration.GetConnectionString("SqliteConnection")
     ?? throw new InvalidOperationException("String de conexão 'SqliteConnection' não encontrada.");
 
-// Adiciona o contexto do bd ao contêiner de serviços (DI - Dependency Injection)
-builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseInMemoryDatabase("MemoryDb"));
-
 // 2. Registrar o DBContext com SQlite
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(stcnn));
 
