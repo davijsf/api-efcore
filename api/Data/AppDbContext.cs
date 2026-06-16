@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Models;
 
 // Classe que representa a sessão do banco de dados
@@ -17,14 +18,87 @@ public class AppDbContext : DbContext
 
     public void PopulateTestData()
     {
-        Console.WriteLine("Apago dados de teste...");
+        Console.WriteLine("Apagando dados de teste...");
         Livros.RemoveRange(Livros.ToList());
+        Categorias.RemoveRange(Categorias.ToList());
+        Perfis.RemoveRange(Perfis.ToList());
+        Emprestimos.RemoveRange(Emprestimos.ToList());
+        Usuarios.RemoveRange(Usuarios.ToList());
+        SaveChanges();
+
         Console.WriteLine("Adicionar dados de teste...");
-        Livros.AddRange(
-            new Livro { Titulo = "O pequeno príncipe", Autor = "Davi de Dó", AnoPublicacao = 2000, QuantidadeDisponivel = 150},
-            new Livro { Titulo = "As aventuras de Tintin", Autor = "Lusiane de Lá", AnoPublicacao = 1998, QuantidadeDisponivel = 10},
-            new Livro { Titulo = "As crônicas de nárnia", Autor = "Carlos de Si", AnoPublicacao = 2015, QuantidadeDisponivel = 15}
-        );
+
+        // Categorias: 
+        var cat1 = new Categoria { Nome = "Ficção" };
+        var cat2 = new Categoria { Nome = "Aventura" };
+        Categorias.AddRange(cat1, cat2);
+        SaveChanges(); // Salva para gerar os Ids
+
+        // livros
+        var livro1 = new Livro { Titulo = "O pequeno príncipe",    Autor = "Davi de Dó",    AnoPublicacao = 2000, 
+            QuantidadeDisponivel = 150, CategoriaId = cat1.Id };
+
+        var livro2 = new Livro { Titulo = "As aventuras de Tintin", Autor = "Lusiane de Lá", AnoPublicacao = 1998,
+            QuantidadeDisponivel = 10,  CategoriaId = cat2.Id };
+
+        var livro3 = new Livro { Titulo = "As crônicas de nárnia",  Autor = "Carlos de Si",  AnoPublicacao = 2015,
+            QuantidadeDisponivel = 15,  CategoriaId = cat1.Id };
+        Livros.AddRange(livro1, livro2, livro3);
+        SaveChanges();
+
+        // Perfis
+        var p1 = new Perfil { Nivel = Enum.Parse<EnuNivelAcesso>("Admin")};
+        var p2 = new Perfil { Nivel = Enum.Parse<EnuNivelAcesso>("Bibliotecario")};
+        var p3 = new Perfil { Nivel = Enum.Parse<EnuNivelAcesso>("Leitor")};
+        Perfis.AddRange(p1, p2, p3);
+        SaveChanges();
+
+        // Usuarios
+        var hasher = new PasswordHasher<Usuario>();
+
+        var usr1 = new Usuario { Email = "joao@email.com", Nome = "João", Perfil = p3};
+        usr1.SenhaHash = hasher.HashPassword(usr1, "senha123");
+
+        var usr2 = new Usuario { Email = "carlos@email.com", Nome = "Carlos", Perfil = p2};
+        usr2.SenhaHash = hasher.HashPassword(usr2, "s1234");
+       
+        var usr3 = new Usuario { Email = "lusiane@email.com", Nome = "Lusiane", Perfil = p3};
+        usr2.SenhaHash = hasher.HashPassword(usr3, "s1234");
+        Usuarios.AddRange(usr1, usr2, usr3);
+        SaveChanges();
+
+        // Empréstimos
+        var emprestimo1 = new Emprestimo
+        {
+            UsuarioId             = usr1.Id,
+            LivroId               = livro1.Id,
+            DataEmprestimo        = DateTime.Now.AddDays(-10),
+            DataPrevistaDevolucao = DateTime.Now.AddDays(-3),
+            DataDevolucao         = DateTime.Now.AddDays(-5), // Devolvido antes do prazo
+            Status                = EnuStatusEmprestimo.Devolvido
+        };
+
+        var emprestimo2 = new Emprestimo
+        {
+            UsuarioId             = usr1.Id,
+            LivroId               = livro2.Id,
+            DataEmprestimo        = DateTime.Now.AddDays(-5),
+            DataPrevistaDevolucao = DateTime.Now.AddDays(2),
+            DataDevolucao         = null, // Ainda não devolvido
+            Status                = EnuStatusEmprestimo.Ativo
+        };
+
+        var emprestimo3 = new Emprestimo
+        {
+            UsuarioId             = usr3.Id,
+            LivroId               = livro3.Id,
+            DataEmprestimo        = DateTime.Now.AddDays(-20),
+            DataPrevistaDevolucao = DateTime.Now.AddDays(-10),
+            DataDevolucao         = null, // Atrasado, não devolvido
+            Status                = EnuStatusEmprestimo.Atrasado
+        };
+
+        Emprestimos.AddRange(emprestimo1, emprestimo2, emprestimo3);
         SaveChanges();
     }
 }
