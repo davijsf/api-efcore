@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+# Ignorar o banco de dados local gerado automaticamente
+labore.db
+
 # User-specific files
 *.rsuser
 *.suo
