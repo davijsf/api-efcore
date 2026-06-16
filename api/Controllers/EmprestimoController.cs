@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models;
+using Dtos;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -15,17 +16,19 @@ public class EmprestimoController : ControllerBase
 
     // GET: api/emprestimo
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Emprestimo>>> GetAll()
+    public async Task<ActionResult<IEnumerable<EmprestimoDto>>> GetAll()
     {
-        return await _context.Emprestimos
+        var emprestimos = await _context.Emprestimos
             .Include(e => e.Usuario)
             .Include(e => e.Livro)
             .ToListAsync();
+
+        return Ok(emprestimos.Select(e => e.ToDto()));
     }
 
     // GET: api/emprestimo/1
     [HttpGet("{id}")]
-    public async Task<ActionResult<Emprestimo>> GetById(int id)
+    public async Task<ActionResult<EmprestimoDto>> GetById(int id)
     {
         var emprestimo = await _context.Emprestimos
             .Include(e => e.Usuario)
@@ -33,26 +36,31 @@ public class EmprestimoController : ControllerBase
             .FirstOrDefaultAsync(e => e.Id == id);
 
         if (emprestimo == null) return NotFound();
-        return emprestimo;
+        return Ok(emprestimo.ToDto());
     }
 
     // POST: api/emprestimo
     [HttpPost]
-    public async Task<ActionResult<Emprestimo>> Create(Emprestimo emprestimo)
+    public async Task<ActionResult<EmprestimoDto>> Create(EmprestimoCreateDto dto)
     {
-        var livro = await _context.Livros.FindAsync(emprestimo.LivroId);
+        var livro = await _context.Livros.FindAsync(dto.LivroId);
         if (livro == null) return NotFound("Livro não encontrado.");
         if (livro.QuantidadeDisponivel <= 0) return BadRequest("Livro indisponível para empréstimo.");
 
-        emprestimo.DataEmprestimo = DateTime.UtcNow;
+        var usuario = await _context.Usuarios.FindAsync(dto.UsuarioId);
+        if (usuario == null) return NotFound("Usuário não encontrado.");
+
+        var emprestimo = dto.ToModel();
         emprestimo.Status = EnuStatusEmprestimo.Ativo;
 
         livro.QuantidadeDisponivel--;
-
         _context.Emprestimos.Add(emprestimo);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetById), new { id = emprestimo.Id }, emprestimo);
+        await _context.Entry(emprestimo).Reference(e => e.Livro).LoadAsync();
+        await _context.Entry(emprestimo).Reference(e => e.Usuario).LoadAsync();
+
+        return CreatedAtAction(nameof(GetById), new { id = emprestimo.Id }, emprestimo.ToDto());
     }
 
     // PATCH: api/emprestimo/1/devolver
@@ -69,7 +77,6 @@ public class EmprestimoController : ControllerBase
 
         emprestimo.DataDevolucao = DateTime.UtcNow;
         emprestimo.Status = EnuStatusEmprestimo.Devolvido;
-
         emprestimo.Livro!.QuantidadeDisponivel++;
 
         await _context.SaveChangesAsync();
@@ -78,7 +85,7 @@ public class EmprestimoController : ControllerBase
 
     // GET: api/emprestimo/atrasados
     [HttpGet("atrasados")]
-    public async Task<ActionResult<IEnumerable<Emprestimo>>> GetAtrasados()
+    public async Task<ActionResult<IEnumerable<EmprestimoDto>>> GetAtrasados()
     {
         var hoje = DateTime.UtcNow;
 
@@ -88,7 +95,7 @@ public class EmprestimoController : ControllerBase
             .Where(e => e.Status == EnuStatusEmprestimo.Ativo && e.DataPrevistaDevolucao < hoje)
             .ToListAsync();
 
-        return Ok(atrasados);
+        return Ok(atrasados.Select(e => e.ToDto()));
     }
 
     // DELETE: api/emprestimo/1
