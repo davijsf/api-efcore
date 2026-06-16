@@ -7,7 +7,7 @@
 .env
 
 # Ignorar o banco de dados local gerado automaticamente
-labore.db
+labcore.db
 
 # User-specific files
 *.rsuser
