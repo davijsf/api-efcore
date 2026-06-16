@@ -14,6 +14,7 @@ public class UsuarioController : ControllerBase
     } 
 
     // GET: api/usuario
+    [HttpGet]
     public async Task<ActionResult<IEnumerable<Usuario>>> GetAll()
     {
         return await _context.Usuarios.ToListAsync();
@@ -48,6 +49,7 @@ public class UsuarioController : ControllerBase
     }
 
     // DELETE: api/usuario/1
+    [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
         var usuario =  await _context.Usuarios.FindAsync(id);
