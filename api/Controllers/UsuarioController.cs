@@ -1,7 +1,5 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Models;
 using Dtos;
 
 [ApiController]
@@ -9,12 +7,10 @@ using Dtos;
 public class UsuarioController : ControllerBase
 {
     private readonly AppDbContext _context;
-    private readonly PasswordHasher<Usuario> _hasher;
 
     public UsuarioController(AppDbContext context)
     {
         _context = context;
-        _hasher = new PasswordHasher<Usuario>();
     }
 
     // GET: api/usuario
@@ -48,7 +44,7 @@ public class UsuarioController : ControllerBase
             return BadRequest("Perfil inválido.");
 
         var usuario = dto.ToModel();
-        usuario.SenhaHash = _hasher.HashPassword(usuario, dto.Senha);
+        usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(dto.Senha);
 
         _context.Usuarios.Add(usuario);
         await _context.SaveChangesAsync();
@@ -73,7 +69,7 @@ public class UsuarioController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(dto.Senha))
         {
-            usuario.SenhaHash = _hasher.HashPassword(usuario, dto.Senha);
+            usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(dto.Senha);
         }
 
         await _context.SaveChangesAsync();

@@ -43,16 +43,19 @@ public class EmprestimoController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<EmprestimoDto>> Create(EmprestimoCreateDto dto)
     {
+        // Verifica se o Livro existe e se tem quantidade disponível (> 0)
         var livro = await _context.Livros.FindAsync(dto.LivroId);
         if (livro == null) return NotFound("Livro não encontrado.");
         if (livro.QuantidadeDisponivel <= 0) return BadRequest("Livro indisponível para empréstimo.");
-
+        
+        // Verifica se o usuário existe
         var usuario = await _context.Usuarios.FindAsync(dto.UsuarioId);
         if (usuario == null) return NotFound("Usuário não encontrado.");
 
         var emprestimo = dto.ToModel();
         emprestimo.Status = EnuStatusEmprestimo.Ativo;
 
+        // Decrementa [QuantidadeDisponivel] do Livro:
         livro.QuantidadeDisponivel--;
         _context.Emprestimos.Add(emprestimo);
         await _context.SaveChangesAsync();
@@ -66,7 +69,8 @@ public class EmprestimoController : ControllerBase
     // PATCH: api/emprestimo/1/devolver
     [HttpPatch("{id}/devolver")]
     public async Task<IActionResult> Devolver(int id)
-    {
+    {  
+        // Faz a busca por ID [Empréstimos]
         var emprestimo = await _context.Emprestimos
             .Include(e => e.Livro)
             .FirstOrDefaultAsync(e => e.Id == id);
@@ -75,6 +79,9 @@ public class EmprestimoController : ControllerBase
         if (emprestimo.Status == EnuStatusEmprestimo.Devolvido)
             return BadRequest("Este empréstimo já foi devolvido.");
 
+        // Marca a {DataDevolucao}
+        // Define Status = Ativo
+        // Devolve o Livro ao estoque [QuantidadeDisponivel++]
         emprestimo.DataDevolucao = DateTime.UtcNow;
         emprestimo.Status = EnuStatusEmprestimo.Devolvido;
         emprestimo.Livro!.QuantidadeDisponivel++;
@@ -87,6 +94,7 @@ public class EmprestimoController : ControllerBase
     [HttpGet("atrasados")]
     public async Task<ActionResult<IEnumerable<EmprestimoDto>>> GetAtrasados()
     {
+        // retorna os Empréstimos atrasados
         var hoje = DateTime.UtcNow;
 
         var atrasados = await _context.Emprestimos

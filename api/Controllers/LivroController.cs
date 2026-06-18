@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Models;
 using Dtos;
 
 [ApiController]
@@ -41,9 +40,11 @@ public class LivroController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<LivroDto>> Create(LivroCreateDto dto)
     {
+        // Verifica se categoria existe:
         if (!await _context.Categorias.AnyAsync(c => c.Id == dto.CategoriaId))
             return BadRequest("Categoria inválida.");
 
+        // Se existir, adiciona o Livro:
         var livro = dto.ToModel();
         _context.Livros.Add(livro);
         await _context.SaveChangesAsync();
