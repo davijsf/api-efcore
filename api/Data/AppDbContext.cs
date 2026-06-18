@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 using Models;
 
 // Classe que representa a sessão do banco de dados
@@ -8,7 +7,6 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
-
     // Adição das tabelas (entidades):
     public DbSet<Livro> Livros { get; set; }
     public DbSet<Categoria> Categorias { get; set; }
@@ -54,16 +52,15 @@ public class AppDbContext : DbContext
         SaveChanges();
 
         // Usuarios
-        var hasher = new PasswordHasher<Usuario>();
 
         var usr1 = new Usuario { Email = "joao@email.com", Nome = "João", Perfil = p3};
-        usr1.SenhaHash = hasher.HashPassword(usr1, "senha123");
+        usr1.SenhaHash = BCrypt.Net.BCrypt.HashPassword("senha123");
 
         var usr2 = new Usuario { Email = "carlos@email.com", Nome = "Carlos", Perfil = p2};
-        usr2.SenhaHash = hasher.HashPassword(usr2, "s1234");
+        usr2.SenhaHash = BCrypt.Net.BCrypt.HashPassword("s1234");
        
         var usr3 = new Usuario { Email = "lusiane@email.com", Nome = "Lusiane", Perfil = p3};
-        usr2.SenhaHash = hasher.HashPassword(usr3, "s1234");
+        usr2.SenhaHash = BCrypt.Net.BCrypt.HashPassword("s1234");
         Usuarios.AddRange(usr1, usr2, usr3);
         SaveChanges();
 
