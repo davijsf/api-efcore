@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +13,17 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(stcnn))
 // 3. Serviços
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer(); // Necessário para o Swagger
-builder.Services.AddSwaggerGen(); // Gera a UI interativa
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "API Biblioteca",
+        Version = "v1",
+        Description = "API para gerenciamento de livros, usuários e empréstimo de uma biblioteca."
+    });
+}); 
+
 builder.Services.AddOpenApi();
 // Adicionar politica de CORS (Cross-Origin Resource Sharing)
 // É um mecanismo de segurança implementado pelos navegadores
@@ -44,9 +55,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger(); // gera /swagger/v1/swagger.json
     app.UseSwaggerUI(); // gera a UI em /swagger
     
-    using ( var scope = app.Services.CreateScope()) {
+    using ( var scope = app.Services.CreateScope()) 
+    {
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        context.PopulateTestData();
+        try 
+        {
+            context.PopulateTestData();
+        } 
+        catch (Exception ex)
+        {
+            Console.WriteLine(" Erro ao popular dados de teste: ");
+            Console.WriteLine(ex.Message);
+        }
     }
 }
 

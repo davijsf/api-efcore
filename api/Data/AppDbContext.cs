@@ -17,11 +17,16 @@ public class AppDbContext : DbContext
     public void PopulateTestData()
     {
         Console.WriteLine("Apagando dados de teste...");
+        
+        Emprestimos.RemoveRange(Emprestimos.ToList());
+        SaveChanges();
+        
+        Usuarios.RemoveRange(Usuarios.ToList());
         Livros.RemoveRange(Livros.ToList());
+        SaveChanges();
+        
         Categorias.RemoveRange(Categorias.ToList());
         Perfis.RemoveRange(Perfis.ToList());
-        Emprestimos.RemoveRange(Emprestimos.ToList());
-        Usuarios.RemoveRange(Usuarios.ToList());
         SaveChanges();
 
         Console.WriteLine("Adicionar dados de teste...");
@@ -31,6 +36,13 @@ public class AppDbContext : DbContext
         var cat2 = new Categoria { Nome = "Aventura" };
         Categorias.AddRange(cat1, cat2);
         SaveChanges(); // Salva para gerar os Ids
+        
+        // Perfis
+        var p1 = new Perfil { Nivel = Enum.Parse<EnuNivelAcesso>("Admin")};
+        var p2 = new Perfil { Nivel = Enum.Parse<EnuNivelAcesso>("Bibliotecario")};
+        var p3 = new Perfil { Nivel = Enum.Parse<EnuNivelAcesso>("Leitor")};
+        Perfis.AddRange(p1, p2, p3);
+        SaveChanges();
 
         // livros
         var livro1 = new Livro { Titulo = "O pequeno príncipe",    Autor = "Davi de Dó",    AnoPublicacao = 2000, 
@@ -44,12 +56,6 @@ public class AppDbContext : DbContext
         Livros.AddRange(livro1, livro2, livro3);
         SaveChanges();
 
-        // Perfis
-        var p1 = new Perfil { Nivel = Enum.Parse<EnuNivelAcesso>("Admin")};
-        var p2 = new Perfil { Nivel = Enum.Parse<EnuNivelAcesso>("Bibliotecario")};
-        var p3 = new Perfil { Nivel = Enum.Parse<EnuNivelAcesso>("Leitor")};
-        Perfis.AddRange(p1, p2, p3);
-        SaveChanges();
 
         // Usuarios
 
@@ -60,7 +66,8 @@ public class AppDbContext : DbContext
         usr2.SenhaHash = BCrypt.Net.BCrypt.HashPassword("s1234");
        
         var usr3 = new Usuario { Email = "lusiane@email.com", Nome = "Lusiane", Perfil = p3};
-        usr2.SenhaHash = BCrypt.Net.BCrypt.HashPassword("s1234");
+        usr3.SenhaHash = BCrypt.Net.BCrypt.HashPassword("s1234");
+        
         Usuarios.AddRange(usr1, usr2, usr3);
         SaveChanges();
 

@@ -10,5 +10,5 @@ public class Livro
     public int QuantidadeDisponivel { get; set; }
 
     public int CategoriaId { get; set; }
-    public Categoria? Categoria { get; set; }
+    public List<Categoria> Categorias { get; set; } = new();
 }

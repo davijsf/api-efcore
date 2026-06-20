@@ -20,7 +20,7 @@ public static class MappingExtensions
             AnoPublicacao = l.AnoPublicacao,
             QuantidadeDisponivel = l.QuantidadeDisponivel,
             CategoriaId = l.CategoriaId,
-            CategoriaNome = l.Categoria?.Nome
+            CategoriaNome = l.Categorias.FirstOrDefault(c => c.Id == l.CategoriaId)?.Nome ?? "",
         };
 
     public static Livro ToModel(this LivroCreateDto d)

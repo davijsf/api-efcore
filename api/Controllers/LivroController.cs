@@ -18,7 +18,7 @@ public class LivroController : ControllerBase
     public async Task<ActionResult<IEnumerable<LivroDto>>> GetAll()
     {
         var livros = await _context.Livros
-            .Include(l => l.Categoria)
+            .Include(l => l.Categorias)
             .ToListAsync();
 
         return Ok(livros.Select(l => l.ToDto()));
@@ -29,7 +29,7 @@ public class LivroController : ControllerBase
     public async Task<ActionResult<LivroDto>> GetById(int id)
     {
         var livro = await _context.Livros
-            .Include(l => l.Categoria)
+            .Include(l => l.Categorias)
             .FirstOrDefaultAsync(l => l.Id == id);
 
         if (livro == null) return NotFound();
