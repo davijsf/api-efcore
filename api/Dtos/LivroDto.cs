@@ -1,6 +1,6 @@
 namespace Dtos;
 
-public class LivroDto
+public class LivroDto // SAÍDA (O QUE O SISTEMA DEVOLVE PARA O CLIENTE)
 {
     public int Id { get; set; }
     public string Titulo { get; set; } = string.Empty;
@@ -9,10 +9,10 @@ public class LivroDto
     public int AnoPublicacao { get; set; }
     public int QuantidadeDisponivel { get; set; }
     public int CategoriaId { get; set; }
-    public string? CategoriaNome { get; set; }
+    public string CategoriaNome { get; set; } = string.Empty;
 }
 
-public class LivroCreateDto
+public class LivroCreateDto // ENTRADA (O QUE O CLIENTE ENVIA)
 {
     public string Titulo { get; set; } = string.Empty;
     public string Autor { get; set; } = string.Empty;

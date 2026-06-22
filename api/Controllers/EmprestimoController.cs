@@ -18,6 +18,7 @@ public class EmprestimoController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<EmprestimoDto>>> GetAll()
     {
+        // Carrega os relacionamentos
         var emprestimos = await _context.Emprestimos
             .Include(e => e.Usuario)
             .Include(e => e.Livro)
@@ -43,6 +44,7 @@ public class EmprestimoController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<EmprestimoDto>> Create(EmprestimoCreateDto dto)
     {
+        // Regras de negócio antes de criar
         // Verifica se o Livro existe e se tem quantidade disponível (> 0)
         var livro = await _context.Livros.FindAsync(dto.LivroId);
         if (livro == null) return NotFound("Livro não encontrado.");
@@ -67,6 +69,8 @@ public class EmprestimoController : ControllerBase
     }
 
     // PATCH: api/emprestimo/1/devolver
+    // Ação de négocio específica
+    // PATCH: modificação parcial de um recurso
     [HttpPatch("{id}/devolver")]
     public async Task<IActionResult> Devolver(int id)
     {  
@@ -91,6 +95,7 @@ public class EmprestimoController : ControllerBase
     }
 
     // GET: api/emprestimo/atrasados
+    // GET customizado: busca filtrada
     [HttpGet("atrasados")]
     public async Task<ActionResult<IEnumerable<EmprestimoDto>>> GetAtrasados()
     {
@@ -100,7 +105,11 @@ public class EmprestimoController : ControllerBase
         var atrasados = await _context.Emprestimos
             .Include(e => e.Usuario)
             .Include(e => e.Livro)
-            .Where(e => e.Status == EnuStatusEmprestimo.Ativo && e.DataPrevistaDevolucao < hoje)
+            
+            // filtra empéstimos ativos, 
+            // cuja data prevista de devolução já passou
+            .Where(e => e.Status == EnuStatusEmprestimo.Ativo
+                && e.DataPrevistaDevolucao < hoje)
             .ToListAsync();
 
         return Ok(atrasados.Select(e => e.ToDto()));

@@ -4,8 +4,6 @@
 
 API REST local desenvolvida em **C# / ASP.NET Core (.NET 10)** para gerenciamento de uma biblioteca: usuários, perfis de acesso, livros, categorias e empréstimos. Persistência via **Entity Framework Core** com banco **SQLite**, e documentação/teste interativo via **Swagger (Swashbuckle)** + **OpenAPI** nativo do .NET.
 
-A API foi pensada para servir um frontend React (existe uma política de CORS nomeada `AllowReactApp` apontando para `localhost:5173`, porta padrão do Vite).
-
 ## 2. Tecnologias e Pacotes
 
 | Pacote | Função |
@@ -42,7 +40,7 @@ api-efcore/
 ## 4. Modelo de Domínio
 
 ```
-Categoria 1 ──── N Livro N ──── 1 Emprestimo N ──── 1 Usuario N ──── 1 Perfil
+Categoria N ──── N Livro N ──── 1 Emprestimo N ──── 1 Usuario N ──── 1 Perfil
 ```
 
 | Entidade | Campos principais | Relacionamento |

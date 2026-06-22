@@ -2,7 +2,8 @@ using Models;
 
 namespace Dtos;
 
-public class EmprestimoDto
+public class EmprestimoDto // SAÍDA (O QUE O SISTEMA DEVOLVE PARA O CLIENTE)
+
 {
     public int Id { get; set; }
     public int UsuarioId { get; set; }
@@ -15,7 +16,7 @@ public class EmprestimoDto
     public EnuStatusEmprestimo Status { get; set; }
 }
 
-public class EmprestimoCreateDto
+public class EmprestimoCreateDto // ENTRADA (O QUE O CLIENTE ENVIA)
 {
     public int UsuarioId { get; set; }
     public int LivroId { get; set; }

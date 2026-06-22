@@ -9,6 +9,8 @@ public class Livro
     public int AnoPublicacao { get; set; }
     public int QuantidadeDisponivel { get; set; }
 
-    public int CategoriaId { get; set; }
+    // Pode ser nulo, no caso, se o Livro tiver mais de uma categoria: 
+    public int ? CategoriaId { get; set; }
+    
     public List<Categoria> Categorias { get; set; } = new();
 }
