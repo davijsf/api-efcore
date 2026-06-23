@@ -7,7 +7,7 @@ using Dtos;
 public class CategoriaController : ControllerBase
 {
     // Injeção de dependência
-    // AppDbContext é recebido via contrutor 
+    // AppDbContext é recebido via construtor 
     // _context é guardado num campo privado e readonly
     // para ser usado nos métodos da classe
     private readonly AppDbContext _context;

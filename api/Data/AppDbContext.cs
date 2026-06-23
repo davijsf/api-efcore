@@ -38,7 +38,7 @@ public class AppDbContext : DbContext
         var cat3 = new Categoria { Nome = "Terror" };
         var cat4 = new Categoria { Nome = "Ação" };
 
-        Categorias.AddRange(cat1, cat2);
+        Categorias.AddRange(cat1, cat2, cat3, cat4);
         SaveChanges(); // Salva para gerar os Ids
         
 
@@ -46,7 +46,7 @@ public class AppDbContext : DbContext
         var livro1 = new Livro { Titulo = "O pequeno príncipe",    Autor = "Davi de Dó",    AnoPublicacao = 2000, 
             QuantidadeDisponivel = 150};
         livro1.Categorias.AddRange(cat1, cat2);
-
+        
         var livro2 = new Livro { Titulo = "As aventuras de Tintin", Autor = "Lusiane de Lá", AnoPublicacao = 1998,
             QuantidadeDisponivel = 10};
         livro2.Categorias.AddRange(cat1, cat2, cat3);

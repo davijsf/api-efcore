@@ -8,7 +8,7 @@ public class LivroDto // SAÍDA (O QUE O SISTEMA DEVOLVE PARA O CLIENTE)
     public string ISBN { get; set; } = string.Empty;
     public int AnoPublicacao { get; set; }
     public int QuantidadeDisponivel { get; set; }
-    public int CategoriaId { get; set; }
+    public int? CategoriaId { get; set; }
     public string CategoriaNome { get; set; } = string.Empty;
 }
 
